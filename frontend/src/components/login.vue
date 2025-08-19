@@ -1,0 +1,99 @@
+<template>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form @submit.prevent="handleLogin">
+            <div>
+                <label for="email">Enter email</label>
+                <input type="email" v-model="email" required />
+            </div>
+            <div>
+                <label for="password">Enter password</label>
+                <input type="password" v-model="password" required />
+            </div>
+            <button type="submit">Login</button>
+            <text type="button" @click="goToRegister">Register</text>
+        </form>
+        <p v-if="error" class="error">{{error}}</p>
+    </div>
+</template>
+
+<script setup>
+    import { ref } from 'vue';//reactive variable
+    import { useRouter } from 'vue-router';
+
+    const email = ref('');
+    const password = ref('');
+    const error = ref('');
+
+    const router = useRouter();//to redirect to homepage after login
+
+    const goToRegister = () => {
+        router.push('/register');
+    }   
+
+    const handleLogin = async () => {
+        error.value = '';//reset error message
+
+        try {
+            const response = await fetch('http://localhost:5022/api/User/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'//sending JSON data
+                },
+                body: JSON.stringify({
+                    email: email.value,
+                    password: password.value
+                })//convert to JSON
+            });
+
+            if (response.ok) {//was the response successful?
+                const data = await response.json();//parse the JSON response, the userId we have sent in backend
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('firstName', data.firstName);
+                alert('Login successful!');
+                router.push('/homepage');//redirect to homepage
+            } else {
+                const err = await response.text();
+                error.value = err;
+            }
+        } catch (err) {
+            error.value = 'Network error';//fetch failed
+        }
+    }
+</script>
+
+<style scoped>
+    .login-container 
+    {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 2rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid #aaa;
+        border-radius: 4px;
+    }
+
+    button {
+        width: 100%;
+        padding: 0.5rem;
+        background-color: #42b983;
+        border: none;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .error {
+        color: red;
+        margin-top: 1rem;
+    }
+    
+</style>
