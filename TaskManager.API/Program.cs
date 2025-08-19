@@ -9,6 +9,7 @@ using TaskManager.Data;
 using TaskManager.Infrastructure.Repositories;
 using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace TaskManager.API
 {
@@ -54,6 +55,28 @@ namespace TaskManager.API
             //password hasher service
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+            //binding jwt
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.Configure<JwtOptions>(
+                builder.Configuration.GetSection("Jwt"));
+
+            var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();//bu binding i birazdan kullanmak için yapýyoruz
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>//tells asp.net how to validate tokens
+                {
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateLifetime = true,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                            System.Text.Encoding.UTF8.GetBytes(jwtOptions.Key))
+
+                    };
+                });
+            builder.Services.AddAuthorization();//register authorization services
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -70,6 +93,8 @@ namespace TaskManager.API
             }
 
             app.UseCors("AllowFrontend");
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -1,7 +1,7 @@
 ﻿namespace TaskManager.Application.DTOs
 {
     //shape of the data the client will send
-    public class CreateTaskDTO
+    public record CreateTaskDTO
     {
         public string taskName { get; set; }
         public string taskDescription { get; set; }

@@ -60,7 +60,6 @@ namespace TaskManager.Application.Handlers.Tasks
                     newTask.Tags.Add(tag);//add the tag to the task
                 }
 
-                await _taskRepo.AddAsync(newTask);
                 await _taskRepo.SaveChangesAsync();
             }
         }

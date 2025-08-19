@@ -25,7 +25,7 @@ namespace TaskManager.Controllers
         }
 
 
-        [HttpGet("get_tasks/{userId}")]
+        [HttpGet("get_tasks/my-tasks")]
         public async Task<IActionResult> GetTasks(int userId)
         {
             var tasks = await _getTasksHandler.HandleAsync(userId); 
@@ -34,42 +34,12 @@ namespace TaskManager.Controllers
         }
 
         //now we define the actions that this controller will handle
-        [HttpPost]//will handle POST requests
+        [HttpPost("create-task")]//will handle POST requests
         public async Task<IActionResult> CreateTask([FromBody] CreateTaskDTO dto)
         {
             await _createTaskHandler.HandleAsync(dto);
             return Ok("Task created successfully!");
 
         }
-
-        //[HttpPost("add_tags/{taskId}")]
-        //public async Task<IActionResult> AddTags(int taskId, [FromBody] List<string> tags)
-        //{
-        //    var normalized = tags
-        //            .Select(t => t.Trim())
-        //            .Where(t => !string.IsNullOrWhiteSpace(t))
-        //            .Distinct(StringComparer.OrdinalIgnoreCase)
-        //            .ToList();
-
-        //    var task = await _context.Tasks
-        //        .Include(t => t.Tags)
-        //        .FirstOrDefaultAsync(t => t.taskId == taskId);
-        //    if (task == null)
-        //    {
-        //        return NotFound("Task not found");
-        //    }
-
-        //    var existingTags = await _context.Tags
-        //        .ToDictionaryAsync(t => t.tagName, StringComparer.OrdinalIgnoreCase);
-
-        //    foreach (var tagName in normalized)
-        //    {
-        //        if(!existingTags.TryGetValue(tagName, out var existingTag)){
-                    
-        //        }
-        //    }
-
-
-        //}
     }
 }

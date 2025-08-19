@@ -16,11 +16,13 @@ namespace TaskManager.Application.Handlers.Users
     {
         private readonly IUserRepository _userRepo;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public LoginUserHandler(IUserRepository userRepo, IPasswordHasher passwordHasher)
+        public LoginUserHandler(IUserRepository userRepo, IPasswordHasher passwordHasher, IJwtTokenService jwtTokenService)
         {
             _userRepo = userRepo;
             _passwordHasher = passwordHasher;
+            _jwtTokenService = jwtTokenService;
         }
 
         public async System.Threading.Tasks.Task<object> HandleAsync(LoginDTO dto)//returns an object
@@ -40,7 +42,9 @@ namespace TaskManager.Application.Handlers.Users
                 throw new UnauthorizedAccessException("Please verify your email before logging in.");
             }
 
-            return new { userId = user.usrId };
+            var token = _jwtTokenService.GenerateToken(user);
+
+            return new { token=token, firstName = user.firstName};
         }
     }
 }

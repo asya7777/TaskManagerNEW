@@ -1,6 +1,6 @@
 ﻿namespace TaskManager.Application.DTOs
 {
-    public class RegisterDTO
+    public record RegisterDTO
     {
         public string email { get; set; }
         public string firstName { get; set; }
