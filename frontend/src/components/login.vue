@@ -1,16 +1,14 @@
 <template>
     <div class="login-container">
-        <h1>Login</h1>
+        <h1 class="mb-4">Login</h1>
         <form @submit.prevent="handleLogin">
             <div>
-                <label for="email">Enter email</label>
-                <input type="email" v-model="email" required />
+                <input class="form-control" id="email" type="email" v-model="email" placeholder="Enter email" required />
             </div>
             <div>
-                <label for="password">Enter password</label>
-                <input type="password" v-model="password" required />
+                <input class="form-control" id="password" type="password" v-model="password" placeholder="Enter password" required />
             </div>
-            <button type="submit">Login</button>
+            <button class="form-control mb-4" type="submit">Login</button>
             <text type="button" @click="goToRegister">Register</text>
         </form>
         <p v-if="error" class="error">{{error}}</p>
@@ -48,10 +46,20 @@
 
             if (response.ok) {//was the response successful?
                 const data = await response.json();//parse the JSON response, the userId we have sent in backend
+
+                localStorage.setItem('userId', data.userId);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('firstName', data.firstName);
+                localStorage.setItem('role', data.role);
+
                 alert('Login successful!');
-                router.push('/homepage');//redirect to homepage
+
+                if (data.role == "Admin") {
+                    router.push('/admin-page');
+                } else {
+                    router.push('/user-page');
+                }
+
             } else {
                 const err = await response.text();
                 error.value = err;
@@ -59,6 +67,8 @@
         } catch (err) {
             error.value = 'Network error';//fetch failed
         }
+
+        
     }
 </script>
 
@@ -90,6 +100,10 @@
         font-weight: bold;
         cursor: pointer;
     }
+
+    button:hover {
+            background-color: seagreen;
+        }
 
     .error {
         color: red;

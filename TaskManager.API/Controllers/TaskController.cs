@@ -5,6 +5,8 @@ using TaskManager.Application.Handlers.Tasks;
 using TaskManager.Data;
 using TaskManager.Application.DTOs;
 using TaskManager.Domain.Entities;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskManager.Controllers
 {
@@ -25,7 +27,7 @@ namespace TaskManager.Controllers
         }
 
 
-        [HttpGet("get_tasks/my-tasks")]
+        [HttpGet("my-tasks")]
         public async Task<IActionResult> GetTasks(int userId)
         {
             var tasks = await _getTasksHandler.HandleAsync(userId); 
@@ -33,7 +35,7 @@ namespace TaskManager.Controllers
             return Ok(tasks);
         }
 
-        //now we define the actions that this controller will handle
+        [Authorize(Roles ="User")]
         [HttpPost("create-task")]//will handle POST requests
         public async Task<IActionResult> CreateTask([FromBody] CreateTaskDTO dto)
         {

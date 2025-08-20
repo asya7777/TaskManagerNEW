@@ -1,38 +1,38 @@
 <template>
     <div class="register-container">
-        <h1>Register</h1>
+        <h1 class="mb-4">Register</h1>
         <form @submit.prevent="handleRegister">
             <div>
-                <label for="email">Enter email</label>
-                <input type="email" v-model="email" required />
+                <input class="form-control" id="email" name="email" type="email" v-model="email" placeholder="Email" required />
             </div>
             <div>
-                <label for="firstName">Enter name</label>
-                <input type="text" v-model="firstName" required />
+                <input class="form-control" id="firstName" name="firstName" type="text" v-model="firstName" placeholder="First name" required />
             </div>
             <div>
-                <label for="lastName">Enter surname</label>
-                <input type="text" v-model="lastName" required />
+                <input class="form-control" id="lastName" name="lastName" type="text" v-model="lastName" placeholder="Last name" />
             </div>
             <div>
-                <label for="password">Enter password</label>
-                <input type="password" v-model="password" required />
+                <input class="form-control" id="password" name="password" type="password" v-model="password" placeholder="Password" required />
             </div>
-            <div>
-                <select v-model="userRole">
+            <div class="mb-4">
+                <label for="userRole" class="form-label"></label>
+                <select id="userRole" name="userRole" v-model="userRole" class="form-select" required>
                     <option value="" disabled>Select a role</option>
                     <option value="Admin">Admin</option>
                     <option value="User">User</option>
                 </select>
             </div>
-            <button type="submit">Sign Up</button>
+
+            <button class="form-control mb-2" type="submit">Sign Up</button>
+            <text type="button" @click="goToLogin">Login</text>
         </form>
-        <p v-if="error" class="error">{{error}}</p>
+        <p v-if="error" class="error">{{ error }}</p>
     </div>
 </template>
 
 <script setup>
     import { ref } from 'vue';
+    import { useRouter } from 'vue-router';
 
     const email = ref('');
     const firstName = ref('');
@@ -40,6 +40,12 @@
     const password = ref('');
     const userRole = ref('');
     const error = ref('');
+
+    const router = useRouter();
+
+    const goToLogin = () => {
+        router.push('/login');
+    } 
 
     const handleRegister = async () => {
         error.value = '';
@@ -65,7 +71,7 @@
 
             const result = await response.text();//if successful, get the response text
             alert(result);//display result
-            router.push('/homepage');//redirect to login page
+            router.push('/login');//redirect to login page
 
         }
         catch (err) {
@@ -103,6 +109,10 @@
         color: white;
         font-weight: bold;
         cursor: pointer;
+    }
+
+    button:hover{
+        background-color:seagreen;
     }
 
     .error {

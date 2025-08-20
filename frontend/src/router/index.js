@@ -4,10 +4,12 @@ import LoginPage from '../components/login.vue'
 import RegisterPage from '../components/register.vue'
 import HomePage from '../components/homepage.vue'
 import CreateTask from '../components/CreateTask.vue'
+import AdminPage from '../components/adminPage.vue'
+import UserPage from '../components/userPage.vue'
 
 const routes = [
     {
-        path: '/',
+        path: '/login',
         component: LoginPage
     }
     ,{
@@ -15,12 +17,20 @@ const routes = [
         component: RegisterPage
     }
     , {
-        path: '/homepage',
+        path: '/',
         component: HomePage
     }
     , {
         path: '/create-task', 
         component: CreateTask
+    }
+    , {
+        path: '/admin-page',
+        component: AdminPage
+    }
+    , {
+        path: '/user-page',
+        component:UserPage
     }
 ];
 

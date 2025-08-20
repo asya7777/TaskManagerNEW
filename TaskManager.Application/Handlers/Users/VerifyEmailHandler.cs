@@ -12,9 +12,9 @@ namespace TaskManager.Application.Handlers.Users
     {
         private readonly IUserRepository _userRepo;
 
-        public VerifyEmailHandler(IUserRepository _userRepo)
+        public VerifyEmailHandler(IUserRepository userRepo)
         {
-            _userRepo = _userRepo;
+            _userRepo = userRepo;
         }
 
         public async System.Threading.Tasks.Task HandleAsync(string token)

@@ -44,7 +44,7 @@ namespace TaskManager.Application.Handlers.Users
 
             var token = _jwtTokenService.GenerateToken(user);
 
-            return new { token=token, firstName = user.firstName};
+            return new {userId=user.usrId, token=token, firstName = user.firstName, role= user.userRole};
         }
     }
 }

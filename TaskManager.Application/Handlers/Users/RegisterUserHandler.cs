@@ -46,7 +46,7 @@ namespace TaskManager.Application.Handlers.Users
             await _userRepo.SaveChangesAsync();//commit to db
 
             //email gönderme kısmı
-            var verificationUrl = $"https://localhost:5082/api/User/verify?token={newUser.verificationToken}";
+            var verificationUrl = $"http://localhost:5022/api/User/verify?token={newUser.verificationToken}";
             var body = $@"<h2>Welcome, {newUser.firstName}!</h2>
                           <p>Thank you for registering. Please verify your email by clicking the link below:</p>
                           <a href='{verificationUrl}'>Verify Email</a>

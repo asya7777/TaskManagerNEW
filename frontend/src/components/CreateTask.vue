@@ -1,23 +1,34 @@
 <template>
+
+    <header class="mb-8 navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar_brand fw_bold" href="/">
+                <img src="../assets/images/homeimg.png" alt="home image" width="50" height="50" />
+            </a>
+
+            <h1>TASK MANAGER</h1>
+        </div>
+    </header>
+
     <div class="create-task">
-        <h2>Create New Task</h2>
+
+        <h2 class="mb-4">Create New Task</h2>
         <form @submit.prevent="handleCreate">
             <div>
-                <label>Task Name</label>
-                <input type="text" v-model="taskName" required />
+                <input class="form-control" type="text" v-model="taskName" placeholder="Task Name" required />
             </div>
-            <div>
-                <label>Description</label>
-                <textarea type="text" v-model="taskDescription" required></textarea>
+            <div class="mb-7">
+                <textarea class="form-control" type="text" v-model="taskDescription" placeholder="Description" required></textarea>
             </div>
-            <div>
+            <div class="mb-5">
                 <label>Deadline</label>
                 <input type="datetime-local" v-model="taskDeadline" required />
             </div>
 
-            <div>
-                <label>Choose a user to assign:</label>
-                <select v-model="selectedUserId" required><!--if the user picks the user with id=3, selectedUserId.value=3-->
+            <div class="mb-5">
+                <label>Choose a user to assign</label>
+                <select v-model="selectedUserId" class="form-select" required>
+                    <!--if the user picks the user with id=3, selectedUserId.value=3-->
                     <option disabled value="">Select a user</option><!--selectedUserId = "", daha seçim yapýlmadý -->
                     <option v-for="user in users" :key="user.usrId" :value="user.usrId">
                         {{ user.firstName }} {{ user.lastName }}
@@ -31,11 +42,11 @@
                     <input type="text" v-model="newTag" @keydown.enter.prevent="addTag" />
                 </div>
             </div>
-            <div class="tags-list">
+            <div class="mb-4 tags-list ">
                 <span v-for="(tag, index) in tags"
-                      :accesskey="index">
+                      :accesskey="index" class="tag-pill">
                     {{tag}}
-                    <button type="button" class="remove-tag" @click="removeTag(index)">x</button>
+                    <button type="button" class="rounded-circle remove-tag" @click="removeTag(index)">x</button>
                 </span>
             </div>
 
@@ -111,7 +122,7 @@
             selectedUserId.value = '';
             tags.value = [];
 
-            router.push('/homepage');
+            router.push('/userPage');
 
         } catch (err) {
             error.value = err.message || 'Network error';
@@ -127,6 +138,10 @@
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    label{
+        font-size:1.2rem;
     }
 
     input {
@@ -157,6 +172,23 @@
         cursor: pointer;
     }
 
+    .tag-pill {
+        display: inline-flex;
+        width:10%;
+        padding:1px 1px 2px 5px;
+        align-items: center;
+        gap: 6px;
+        font-size: 1rem;
+        margin: 4px;
+        background-color: #e0f7fa;
+        border-radius: 20px; 
+        font-weight: 550;
+    }
+
+    .remove-tag {
+        background-color:transparent;
+        color:black;
+    }
     .error {
         color: red;
         margin-top: 1rem;

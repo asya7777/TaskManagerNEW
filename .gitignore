@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+frontend/src/assets/sass/
+frontend/src/assets/ts/
