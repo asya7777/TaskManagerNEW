@@ -5,8 +5,7 @@
             <a class="navbar_brand fw_bold" href="/">
                 <img src="../assets/images/homeimg.png" alt="home image" width="50" height="50" />
             </a>
-
-            <h1>TASK MANAGER</h1>
+            <button class="logout-btn btn " @click="handleLogout">Logout</button>
         </div>
     </header>
 
@@ -50,7 +49,7 @@
                 </span>
             </div>
 
-            <button type="submit">Create Task</button>
+            <button class="create-button" type="submit">Create Task</button>
             <p v-if="error" class="error">{{error}}</p>
         </form>
     </div>
@@ -60,6 +59,7 @@
     import { ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
     import { apiFetch } from '../apiFetch';
+    import { logout } from "../logout";
 
     const router = useRouter();
 
@@ -122,12 +122,17 @@
             selectedUserId.value = '';
             tags.value = [];
 
-            router.push('/userPage');
+            router.push('/user-page');
 
         } catch (err) {
             error.value = err.message || 'Network error';
         }
     }
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    }
+
 </script>
 
 <style scoped>
@@ -138,6 +143,10 @@
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .logout-btn{
+        width:10%;
     }
 
     label{
@@ -171,10 +180,13 @@
         font-weight: bold;
         cursor: pointer;
     }
+     button:hover {
+            background-color: darkmagenta;
+      }
 
     .tag-pill {
         display: inline-flex;
-        width:10%;
+        width:15%;
         padding:1px 1px 2px 5px;
         align-items: center;
         gap: 6px;

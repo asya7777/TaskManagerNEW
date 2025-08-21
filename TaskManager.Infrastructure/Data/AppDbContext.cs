@@ -57,6 +57,11 @@ namespace TaskManager.Data
                 .WithMany(t => t.Tasks)
                 .HasForeignKey(t => t.usrId);
 
+            modelBuilder.Entity<Domain.Entities.Task>()
+                .Property(t => t.isFinished)
+                .HasColumnType("NUMBER(1)")
+                .HasDefaultValueSql("0");
+
             //TAG
             modelBuilder.Entity<Tag>()
                 .HasKey(t => t.tagId);

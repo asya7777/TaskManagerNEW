@@ -5,8 +5,7 @@
                 <a class="navbar_brand fw_bold" href="/">
                     <img src="../assets/images/homeimg.png" alt="home image" width="50" height="50" />
                 </a>
-
-                <h1>TASK MANAGER</h1>
+                <button class="btn" @click="handleLogout">Logout</button>
             </div>
         </header>
 
@@ -16,12 +15,26 @@
                 <ul class="list-group list-group-flush">
                     <li v-for="task in assignedTasks"
                         :key="task.taskId"
-                        class="list-group-item list-group-item-action"
-                        role="button" @click="openTask(task)">
-                        {{ task.taskName }}
+                        class="task-titles fw-bold list-group-item list-group-item-action">
+                        <input type="checkbox"
+                               v-model="task.isFinished"
+                               @change="markAsFinished(task)"
+                               class="me-2" />
+                        <span :class="{ 'text-decoration-line-through': task.isFinished }"
+                              @click="openTask(task)"
+                              style="cursor: pointer;">
+                            {{ task.taskName }}
+                        </span>
                     </li>
                 </ul>
             </nav>
+
+            <div class="d-flex flex-column">
+                <button class="sort-btn btn mb-3" @click="showFilterPopup = true">
+                    Sort By
+                </button>
+                <button class="sort-btn btn" @click="refresh">Refresh</button>
+            </div>
 
             <main class="flex-grow-1 d-flex align-items-center justify-content-center text-center vh-100 ">
 
@@ -40,8 +53,8 @@
 
         </div>
 
-        <div v-if="selectedTask" class="modal-backdrop bg-white">
-            <div class="modal-dialog-box">
+        <div v-if="selectedTask" class="modal-backdrop ">
+            <div class=" modal-dialog-box">
                 <div class="modal-header">
                     <h5>{{ selectedTask.taskName }}</h5>
                     <button @click="closeTask">X</button>
@@ -53,6 +66,23 @@
             </div>
         </div>
 
+        <div v-if="showFilterPopup" class="modal-backdrop">
+            <div class="modal-dialog-box">
+                <div class="modal-header">
+                    <h5>Sort Tasks</h5>
+                    <button @click="showFilterPopup=false">X</button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn w-100 mb-8" @click="sortByDeadline">Sort by urgency</button>
+
+                    <div>
+                        <input type="text" v-model="tagFilter" class="form-control mb-2" placeholder="Enter tag name" />
+                        <button class="btn w-100" @click="sortByTag">Filter by tag</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -60,22 +90,37 @@
     import { ref, onMounted } from 'vue';
     import CreateTask from './CreateTask.vue';
     import { apiFetch } from '../apiFetch';
+    import { useRouter } from 'vue-router';
+    import { logout } from "../logout";
 
+    const router = useRouter();
+
+    const allTasks = ref([]);
     const assignedTasks = ref([]);
     const firstName = ref('');
     const selectedTask = ref(null);
 
-    onMounted(async () => {
-        firstName.value = localStorage.getItem('firstName');
+    const showFilterPopup = ref(false);
+    const tagFilter = ref('');
+
+    const fetchTasks = async () => {
         const userId = localStorage.getItem('userId');
 
         try {
             const response = await apiFetch(`http://localhost:5022/api/Task/my-tasks?userId=${userId}`);
-            assignedTasks.value = await response.json();//pause until backend responds
-        }catch (err) {
+            const data = await response.json();
+            allTasks.value = data;
+            assignedTasks.value = [...data];
+        } catch (err) {
             console.error('Error fetching tasks:', err);
         }
-    });``
+    }
+
+    onMounted(async () => {
+        firstName.value = localStorage.getItem('firstName');
+
+        await fetchTasks();
+    });
 
     //modal açma ve kapama fonksiyonlarý
     const openTask = (task) => {
@@ -84,12 +129,54 @@
     const closeTask = () => {
         selectedTask.value = null;
     };
+    const refresh = (async () => {
+        await fetchTasks();
+    });
 
+    const sortByDeadline = () => {
+        assignedTasks.value.sort((a, b) => new Date(a.taskDeadline) - new Date(b.taskDeadline));
+        showFilterPopup.value = false;
+    };
+
+    const sortByTag = () => {
+        if (!tagFilter.value) return;
+
+        assignedTasks.value = allTasks.value.filter(
+            (task) => task.tags?.some(tag => tag.tagName.toLowerCase() === tagFilter.value.toLowerCase()));
+
+        showFilterPopup.value = false;
+    };
+
+    const markAsFinished = async(task) => {
+        try {
+            await apiFetch(`http://localhost:5022/api/Task/${task.taskId}/finish-task`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({ isFinished: task.isFinished })//sends isFinished depending on the checkbox state
+            });
+
+
+        } catch (err) {
+            console.error("Error finishing task:", err);
+            task.isFinished = !task.isFinished;
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    };
 </script>
 
 <style scoped>
     .sidebar {
         width: 300px;
+    }
+    .sort-btn{
+        height:8%;
     }
     .soft-yellow {
         background-color: #FFF9DB; /* Soft pastel yellow */
@@ -101,12 +188,30 @@
         background-color: mediumseagreen;
     }
     button:hover {
-            background-color: seagreen;
+            background-color: darkmagenta;
         }
     .to-do-list{
         font-family:72;
     }
     .to-do-text{
         text-decoration:underline;
+    }
+
+    .modal-backdrop {
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-dialog-box {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 500px;
+        width: 90%; /* responsive */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
 </style>

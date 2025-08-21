@@ -19,11 +19,13 @@ namespace TaskManager.Controllers
     {
         private readonly GetTasksHandler _getTasksHandler;
         private readonly CreateTaskHandler _createTaskHandler;
+        private readonly FinishTaskHandler _finishTaskHandler;
 
-        public TaskController(GetTasksHandler getTasksHandler, CreateTaskHandler createTaskHandler)
+        public TaskController(GetTasksHandler getTasksHandler, CreateTaskHandler createTaskHandler, FinishTaskHandler finishTaskHandler)
         {
             _getTasksHandler = getTasksHandler;
             _createTaskHandler = createTaskHandler;
+            _finishTaskHandler = finishTaskHandler;
         }
 
 
@@ -42,6 +44,20 @@ namespace TaskManager.Controllers
             await _createTaskHandler.HandleAsync(dto);
             return Ok("Task created successfully!");
 
+        }
+
+        [HttpPut("{taskId}/finish-task")]
+        public async Task<IActionResult> FinishTask(int taskId, [FromBody] UpdateTaskDTO dto)
+        {
+            try
+            {
+                await _finishTaskHandler.HandleAsync(taskId, dto.isFinished);
+                return Ok(new { message = "Task status updated", isFinished = dto.isFinished });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
     }
 }

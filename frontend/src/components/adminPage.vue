@@ -5,8 +5,7 @@
                 <a class="navbar_brand fw_bold" href="/">
                     <img src="../assets/images/homeimg.png" alt="home image" width="50" height="50" />
                 </a>
-
-                <h1>TASK MANAGER ADMIN</h1>
+                <button class="btn btn-outline-danger" @click="handleLogout">Logout</button>
             </div>
         </header>
 
@@ -24,6 +23,10 @@
     import { ref, onMounted } from 'vue';
     import CreateTask from './CreateTask.vue';
     import { apiFetch } from '../apiFetch';
+    import { logout } from "../logout";
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
 
     onMounted(async () => {
         firstName.value = localStorage.getItem('firstName');
@@ -36,6 +39,10 @@
         }
     });
 
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    }
 </script>
 
 <style scoped>

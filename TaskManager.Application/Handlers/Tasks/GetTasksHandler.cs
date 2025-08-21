@@ -20,7 +20,8 @@ namespace TaskManager.Application.Handlers.Tasks
         {
             var tasks = await _taskRepo.GetAllTasksAsync(userId);//await kullanmazsan üzerine select kullanamazsın, önce liste olması lazım
 
-            return tasks.Select(t => new {t.taskId, t.taskName, t.taskDeadline, t.taskDescription, t.usrId}).Cast<object>().ToList();
+            return tasks.Select(t => new {t.taskId, t.taskName, t.taskDeadline, t.taskDescription, t.usrId,
+                Tags=t.Tags.Select(tag => new {tag.tagId, tag.tagName}).ToList()}).Cast<object>().ToList();
         }
     }
 }

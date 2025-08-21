@@ -31,6 +31,7 @@ namespace TaskManager.Infrastructure.Repositories
         public async System.Threading.Tasks.Task<List<Domain.Entities.Task>> GetAllTasksAsync(int userId)
         {
             return await _context.Tasks
+                .Include(t => t.Tags)
                 .Where(t => t.usrId == userId)
                 .ToListAsync();
         }

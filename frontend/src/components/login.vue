@@ -16,14 +16,24 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';//reactive variable
-    import { useRouter } from 'vue-router';
+    import { ref, onMounted } from 'vue';//reactive variable
+    import { useRouter, useRoute } from 'vue-router';
 
     const email = ref('');
     const password = ref('');
+    const success = ref('');
+
     const error = ref('');
 
     const router = useRouter();//to redirect to homepage after login
+    const route = useRoute();//gives the current route object
+
+    onMounted(() => {
+        if (route.query.verified) {
+            success.value = "Email verified successfully.";
+        }
+    });
+
 
     const goToRegister = () => {
         router.push('/register');
@@ -31,6 +41,7 @@
 
     const handleLogin = async () => {
         error.value = '';//reset error message
+
 
         try {
             const response = await fetch('http://localhost:5022/api/User/login', {

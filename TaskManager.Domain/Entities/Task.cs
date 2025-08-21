@@ -11,6 +11,8 @@ namespace TaskManager.Domain.Entities
         public int usrId { get; set; }
         public User User { get; set; }
 
+        public bool isFinished { get; set; }
+
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
     }

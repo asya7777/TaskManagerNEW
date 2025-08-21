@@ -14,6 +14,10 @@
             <div>
                 <input class="form-control" id="password" name="password" type="password" v-model="password" placeholder="Password" required />
             </div>
+
+            <div>
+                <input class="form-control" id="password_2" type="password" v-model="password_2" placeholder="Enter password again" required />
+            </div>
             <div class="mb-4">
                 <label for="userRole" class="form-label"></label>
                 <select id="userRole" name="userRole" v-model="userRole" class="form-select" required>
@@ -31,13 +35,14 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { ref,onMounted } from 'vue';
     import { useRouter } from 'vue-router';
 
     const email = ref('');
     const firstName = ref('');
     const lastName = ref('');
     const password = ref('');
+    const password_2 = ref('');
     const userRole = ref('');
     const error = ref('');
 
@@ -49,6 +54,17 @@
 
     const handleRegister = async () => {
         error.value = '';
+
+
+        if (password.value != password_2.value) {
+            error.value = "Passwords don't match!";
+            return;
+        }
+
+        if (password.value.length < 6) {
+            error.value = "Password must be at least 6 characters long.";
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:5022/api/User/register', {

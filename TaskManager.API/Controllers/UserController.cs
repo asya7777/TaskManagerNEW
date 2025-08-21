@@ -42,7 +42,7 @@ namespace TaskManager.Controllers
         {
             await _verifyEmailHandler.HandleAsync(token);
 
-            return Ok("Email verified!");
+            return Redirect("http://localhost:5173/login?verified=true");//query param
 
         }
 
