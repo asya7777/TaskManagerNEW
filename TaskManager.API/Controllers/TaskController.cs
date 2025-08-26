@@ -20,7 +20,6 @@ namespace TaskManager.Controllers
         private readonly GetTasksHandler _getTasksHandler;
         private readonly CreateTaskHandler _createTaskHandler;
         private readonly FinishTaskHandler _finishTaskHandler;
-
         public TaskController(GetTasksHandler getTasksHandler, CreateTaskHandler createTaskHandler, FinishTaskHandler finishTaskHandler)
         {
             _getTasksHandler = getTasksHandler;
@@ -59,5 +58,7 @@ namespace TaskManager.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+
     }
 }

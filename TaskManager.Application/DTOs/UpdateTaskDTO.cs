@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TaskManager.Application.DTOs
 {
-    public class UpdateTaskDTO
+    public record UpdateTaskDTO
     {
         public bool isFinished { get; set; }
     }

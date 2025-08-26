@@ -19,7 +19,7 @@ namespace TaskManager.Application.Handlers.Users
         public async System.Threading.Tasks.Task<IEnumerable<object>> HandleAsync()//<List<User>> diyemiyoruz çünkü tüm user attr. return lemiyor
         {
             var users = await _userRepo.GetAllUsersAsync();
-            return users.Select(u => new {u.usrId, u.firstName, u.lastName });
+            return users.Select(u => new {u.usrId, u.firstName, u.lastName, u.email, u.userRole});
         }
     }
 }

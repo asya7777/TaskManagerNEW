@@ -5,7 +5,8 @@ using TaskManager.Domain.Entities;
 using TaskManager.Application.DTOs;
 
 using TaskManager.Infrastructure.Services;
-using TaskManager.Application.Handlers.Users;//email verification için
+using TaskManager.Application.Handlers.Users;
+using Microsoft.AspNetCore.Authorization;//email verification için
 
 namespace TaskManager.Controllers
 {
@@ -20,12 +21,14 @@ namespace TaskManager.Controllers
         private readonly LoginUserHandler _loginUserHandler;
         private readonly VerifyEmailHandler _verifyEmailHandler;
         private readonly GetAllUsersHandler _getAllUsersHandler;
-        public UserController(RegisterUserHandler registerUserHandler, LoginUserHandler loginUserHandler, VerifyEmailHandler verifyEmailHandler, GetAllUsersHandler getAllUsersHandler)
+        private readonly DeleteUserHandler _deleteUserHandler;
+        public UserController(RegisterUserHandler registerUserHandler, LoginUserHandler loginUserHandler, VerifyEmailHandler verifyEmailHandler, GetAllUsersHandler getAllUsersHandler, DeleteUserHandler deleteUserHandler)
         {
             _registerUserHandler = registerUserHandler;
             _loginUserHandler = loginUserHandler;
             _verifyEmailHandler = verifyEmailHandler;
             _getAllUsersHandler = getAllUsersHandler;
+            _deleteUserHandler = deleteUserHandler;
         }
 
 
@@ -52,6 +55,14 @@ namespace TaskManager.Controllers
         {
             var result = await _loginUserHandler.HandleAsync(dto);
 
+            if (result == null)
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+            if (result.GetType().GetProperty("error") != null)
+            {
+                return BadRequest(result);
+            }   
             return Ok(result);
         }
 
@@ -61,6 +72,19 @@ namespace TaskManager.Controllers
             var users = await _getAllUsersHandler.HandleAsync();
 
             return Ok(users);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _deleteUserHandler.HandleAsync(id);
+
+            if (!result)
+            {
+                return NotFound("User not found.");
+            }
+            return Ok("User deleted successfully.");
         }
     }
 }

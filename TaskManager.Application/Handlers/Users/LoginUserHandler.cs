@@ -30,16 +30,16 @@ namespace TaskManager.Application.Handlers.Users
             var user = await _userRepo.GetByEmailAsync(dto.email);//await kullandık çünkü bir database operation
             if (user == null)
             {
-                throw new UnauthorizedAccessException("Invalid email.");
+                return null;
             }
 
             if(!_passwordHasher.VerifyPassword(dto.password, user.passwordHash, user.passwordSalt))
             {
-                throw new UnauthorizedAccessException("Invalid password.");
+                return null;
             }
             if (!user.verified)
             {
-                throw new UnauthorizedAccessException("Please verify your email before logging in.");
+                return new { error = "Please verify your email before logging in." };
             }
 
             var token = _jwtTokenService.GenerateToken(user);

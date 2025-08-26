@@ -48,6 +48,7 @@ namespace TaskManager.API
             builder.Services.AddScoped<LoginUserHandler>();
             builder.Services.AddScoped<VerifyEmailHandler>();
             builder.Services.AddScoped<GetAllUsersHandler>();
+            builder.Services.AddScoped<DeleteUserHandler>();
             //TASKS
             builder.Services.AddScoped<GetTasksHandler>();
             builder.Services.AddScoped<CreateTaskHandler>();
@@ -55,7 +56,7 @@ namespace TaskManager.API
 
 
             //password hasher service
-            builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+            builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
             //binding jwt
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

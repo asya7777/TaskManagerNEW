@@ -32,10 +32,16 @@
         </form>
         <p v-if="error" class="error">{{ error }}</p>
     </div>
+
+    <div v-if="loading" class="loading-overlay">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden"> Loading...</span>
+        </div>
+    </div>
 </template>
 
 <script setup>
-    import { ref,onMounted } from 'vue';
+    import { ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
 
     const email = ref('');
@@ -46,15 +52,17 @@
     const userRole = ref('');
     const error = ref('');
 
+    const loading = ref(false);
+
     const router = useRouter();
 
     const goToLogin = () => {
         router.push('/login');
-    } 
+    }
 
     const handleRegister = async () => {
         error.value = '';
-
+        loading.value = true;
 
         if (password.value != password_2.value) {
             error.value = "Passwords don't match!";
@@ -92,6 +100,8 @@
         }
         catch (err) {
             error.value = 'Network error';//fetch failed
+        } finally {
+            loading.value = false;
         }
     }
 
@@ -128,12 +138,25 @@
     }
 
     button:hover{
-        background-color:seagreen;
+        background-color:darkmagenta;
     }
 
     .error {
         color: red;
         margin-top: 1rem;
     }
-    
+
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
 </style>

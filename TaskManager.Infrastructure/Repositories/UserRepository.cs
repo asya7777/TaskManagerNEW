@@ -29,6 +29,10 @@ namespace TaskManager.Infrastructure.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.email == email);
         }
+        public async System.Threading.Tasks.Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.usrId == id);
+        }
 
         public async System.Threading.Tasks.Task<User?> GetByVerificationTokenAsync(string token)
         {
@@ -42,6 +46,12 @@ namespace TaskManager.Infrastructure.Repositories
 
         public async System.Threading.Tasks.Task SaveChangesAsync()
         {
+            await _context.SaveChangesAsync();
+        }
+
+        public async System.Threading.Tasks.Task DeleteAsync(User user)
+        {
+             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
     }

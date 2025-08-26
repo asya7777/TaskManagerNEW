@@ -1,6 +1,6 @@
 <template>
     <div class="homepage">
-        <header class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <header class="navbar navbar-expand-lg bg-light navbar-light shadow-sm">
             <div class="container-fluid">
                 <a class="navbar_brand fw_bold" href="#">
                     <img src="../assets/images/homeimg.png" alt="home image" width="50" height="50"  />
@@ -22,9 +22,9 @@
             </div>
         </header>
 
-        <main class="d-flex flex-column align-items-center justify-content-center vh-100 text-center">
-            <h1 class="display-3 fw-bold mb-4">Welcome to Task Manager</h1>
-            <router-link v-if="isLoggedIn" to="/user-page">Start managing your tasks</router-link>
+        <main class="homepage-main d-flex flex-column align-items-center justify-content-center vh-100 text-center">
+            <h1 class="welcome-title display-3 fw-bold mb-">Welcome to Task Manager</h1>
+            <router-link class="redirect-touser " v-if="isLoggedIn" to="/user-page">Start managing your tasks</router-link>
         </main>
     </div>
 </template>
@@ -40,7 +40,19 @@
 </script>
 
 <style>
+    .homepage-main {
+        background-image: url('../assets/images/background.jpg');
+        padding-bottom: 190px;  
+    }
+    .redirect-touser{
+        font-size:1.5rem;
+        color:black;
+        text-decoration:underline;
+    }
     .custom-btn.btn:hover {
         background-color: darkmagenta;
+    }
+    .welcome-title{
+        color:black;
     }
 </style>
