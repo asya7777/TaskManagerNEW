@@ -85,10 +85,9 @@
             }
         } catch (err) {
             error.value = 'Network error';//fetch failed
+            router.push('/login');
         } finally {
             loading.value = false;
-
-
         }
     };
 </script>

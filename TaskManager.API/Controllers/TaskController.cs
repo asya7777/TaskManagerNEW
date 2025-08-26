@@ -20,11 +20,14 @@ namespace TaskManager.Controllers
         private readonly GetTasksHandler _getTasksHandler;
         private readonly CreateTaskHandler _createTaskHandler;
         private readonly FinishTaskHandler _finishTaskHandler;
-        public TaskController(GetTasksHandler getTasksHandler, CreateTaskHandler createTaskHandler, FinishTaskHandler finishTaskHandler)
+        private readonly AddTagHandler _addTagHandler;
+        
+        public TaskController(GetTasksHandler getTasksHandler, CreateTaskHandler createTaskHandler, FinishTaskHandler finishTaskHandler,AddTagHandler addTagHandler)
         {
             _getTasksHandler = getTasksHandler;
             _createTaskHandler = createTaskHandler;
             _finishTaskHandler = finishTaskHandler;
+            _addTagHandler = addTagHandler;
         }
 
 
@@ -36,7 +39,7 @@ namespace TaskManager.Controllers
             return Ok(tasks);
         }
 
-        [Authorize(Roles ="User")]
+        //[Authorize(Roles ="User")]
         [HttpPost("create-task")]//will handle POST requests
         public async Task<IActionResult> CreateTask([FromBody] CreateTaskDTO dto)
         {
@@ -59,6 +62,18 @@ namespace TaskManager.Controllers
             }
         }
 
+        [HttpPost("add-tag")]
+        public async Task<IActionResult> AddTagToTask([FromBody] AddTagDTO dto)
+        {
+            var tag = await _addTagHandler.HandleAsync(dto.tagName);
+            return Ok(tag);
+        }
 
+        [HttpGet("get-all-tags")]
+        public async Task<IActionResult> GetAllTags()
+        {
+            var tags=await _addTagHandler.GetAllTagsAsync();
+            return Ok(tags);
+        }
     }
 }

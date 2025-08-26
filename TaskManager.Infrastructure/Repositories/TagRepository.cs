@@ -29,9 +29,11 @@ namespace TaskManager.Infrastructure.Repositories
             return await _context.Tags.FirstOrDefaultAsync(t => t.tagName == name);
         }
 
-        public async System.Threading.Tasks.Task<List<Tag>> GetAllTagsAsync()
+        public async System.Threading.Tasks.Task<List<string>> GetAllTagsAsync()
         {
-            return await _context.Tags.ToListAsync();
+            return await _context.Tags
+                .Select(t => t.tagName)
+                .ToListAsync();
         }
 
         public async System.Threading.Tasks.Task SaveChangesAsync()

@@ -53,6 +53,7 @@ namespace TaskManager.API
             builder.Services.AddScoped<GetTasksHandler>();
             builder.Services.AddScoped<CreateTaskHandler>();
             builder.Services.AddScoped<FinishTaskHandler>();
+            builder.Services.AddScoped<AddTagHandler>();
 
 
             //password hasher service

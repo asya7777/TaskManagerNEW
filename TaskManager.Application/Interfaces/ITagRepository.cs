@@ -12,7 +12,7 @@ namespace TaskManager.Application.Interfaces
     {
         System.Threading.Tasks.Task AddAsync(Tag tag); // change in memory
         System.Threading.Tasks.Task<Tag?> GetTagsByNameAsync(string name);
-        System.Threading.Tasks.Task<List<Tag>> GetAllTagsAsync();
+        System.Threading.Tasks.Task<List<string>> GetAllTagsAsync();
         System.Threading.Tasks.Task SaveChangesAsync(); // commit changes to the database
     }
 }

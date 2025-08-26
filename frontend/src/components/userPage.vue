@@ -12,6 +12,7 @@
         <div class="d-flex">
             <nav class="shadow-sm sidebar soft-yellow border-end p-3">
                 <h2 class="to-do-text text-center fw-bold mb-3 fs-1">TO DO:</h2>
+                <p v-if="error" class=" fw-bold error-message text-danger text-center">{{ error }}</p>
                 <ul class="to-do-list list-group list-group-flush">
                     <li v-for="task in assignedTasks"
                         :key="task.taskId"
@@ -107,6 +108,8 @@
 
     const router = useRouter();
 
+    const error = ref('');
+
     const allTasks = ref([]);
     const assignedTasks = ref([]);
     const firstName = ref('');
@@ -128,89 +131,91 @@
             assignedTasks.value = [...data];
         } catch (err) {
             console.error('Error fetching tasks:', err);
+            error.value = 'Server might not be running!';
+            allTasks.value = [];
         } finally {
             loading.value = false;
         }
-        };
+    };
 
-        onMounted(async () => {
-            firstName.value = localStorage.getItem('firstName');
+    onMounted(async () => {
+        firstName.value = localStorage.getItem('firstName');
 
-            await fetchTasks();
-        });
+        await fetchTasks();
+    });
 
-        //modal açma ve kapama fonksiyonlarý
-        const openTask = (task) => {
-            selectedTask.value = task;
-        };
-        const closeTask = () => {
-            selectedTask.value = null;
-        };
-        const refresh = (async () => {
-            await fetchTasks();
-        });
+    //modal açma ve kapama fonksiyonlarý
+    const openTask = (task) => {
+        selectedTask.value = task;
+    };
+    const closeTask = () => {
+        selectedTask.value = null;
+    };
+    const refresh = (async () => {
+        await fetchTasks();
+    });
 
-        const sortByDeadline = () => {
-            assignedTasks.value.sort((a, b) => new Date(a.taskDeadline) - new Date(b.taskDeadline));
-            showFilterPopup.value = false;
-        };
+    const sortByDeadline = () => {
+        assignedTasks.value.sort((a, b) => new Date(a.taskDeadline) - new Date(b.taskDeadline));
+        showFilterPopup.value = false;
+    };
 
-        const sortByTag = () => {
-            if (!tagFilter.value) return;
+    const sortByTag = () => {
+        if (!tagFilter.value) return;
 
-            assignedTasks.value = allTasks.value.filter(
-                (task) => task.tags?.some(tag => tag.tagName.toLowerCase() === tagFilter.value.toLowerCase()));
+        assignedTasks.value = allTasks.value.filter(
+            (task) => task.tags?.some(tag => tag.tagName.toLowerCase() === tagFilter.value.toLowerCase()));
 
-            showFilterPopup.value = false;
-        };
+        showFilterPopup.value = false;
+    };
 
-        const markAsFinished = async (task) => {
-            try {
-                await apiFetch(`http://localhost:5022/api/Task/${task.taskId}/finish-task`, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ isFinished: task.isFinished })//sends isFinished depending on the checkbox state
-                });
+    const markAsFinished = async (task) => {
+        try {
+            await apiFetch(`http://localhost:5022/api/Task/${task.taskId}/finish-task`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ isFinished: task.isFinished })//sends isFinished depending on the checkbox state
+            });
 
 
-            } catch (err) {
-                console.error("Error finishing task:", err);
-                task.isFinished = !task.isFinished;
-            }
-        };
+        } catch (err) {
+            console.error("Error finishing task:", err);
+            task.isFinished = !task.isFinished;
+        }
+    };
 
-        const deleteTask = async (taskId) => {
-            try {
-                const response = await fetch(`http://localhost:5022/api/Task/${taskId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-                if (response.ok) {
-                    allTasks.value = allTasks.value.filter(task => task.taskId !== taskId);
-                    assignedTasks.value = assignedTasks.value.filter(task => task.taskId !== taskId);
-                    alert('Task deleted successfully');
-                    selectedTask.value = null;
-                } else {
-                    const errorData = await response.json();
-                    alert('Error deleting task: ' + errorData.message);
+    const deleteTask = async (taskId) => {
+        try {
+            const response = await fetch(`http://localhost:5022/api/Task/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
                 }
-            } catch (err) {
-                console.error("Error deleting task:", err);
+            });
+            if (response.ok) {
+                allTasks.value = allTasks.value.filter(task => task.taskId !== taskId);
+                assignedTasks.value = assignedTasks.value.filter(task => task.taskId !== taskId);
+                alert('Task deleted successfully');
+                selectedTask.value = null;
+            } else {
+                const errorData = await response.json();
+                alert('Error deleting task: ' + errorData.message);
             }
+        } catch (err) {
+            console.error("Error deleting task:", err);
+        }
 
-        };
+    };
 
 
-        const handleLogout = () => {
-            logout();
-            router.push('/');
-        };
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    };
 </script>
 
 <style scoped>
@@ -250,6 +255,7 @@
     .delete-button {
         font-size: 1.2rem;
     }
+
     .tag-pill {
         display: inline-flex;
         width: 15%;
@@ -305,5 +311,9 @@
         align-items: center;
         justify-content: center;
         z-index: 2000;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
     }
 </style>

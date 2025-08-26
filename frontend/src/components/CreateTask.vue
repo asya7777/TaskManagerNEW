@@ -28,20 +28,31 @@
                 <div class="mb-5">
                     <label>Choose a user to assign</label>
                     <select v-model="selectedUserId" class="form-select" required>
-                        <!--if the user picks the user with id=3, selectedUserId.value=3-->
-                        <option disabled value="">Select a user</option><!--selectedUserId = "", daha seçim yapýlmadý -->
-                        <span v-for="user in users" :key="user.usrId" :value="user.usrId">
-                        <option v-if="user && user.userRole === 'User'">
+                        <option v-for="user in users"
+                                :key="user.usrId"
+                                :value="user.usrId">
                             {{ user.firstName }} {{ user.lastName }}
                         </option>
-                        </span>
+
                     </select>
                 </div>
 
                 <div class="tags-section">
                     <label>Add tags</label>
-                    <div class="tags-input">
-                        <input type="text" v-model="newTag" @keydown.enter.prevent="addTag" />
+                    <div class="tags-input position-relative">
+                        <input type="text"
+                               v-model="newTag"
+                               @focus="showAllTags"
+                               @input="filterTags"
+                               @blur="closeMenu"
+                               @keydown.enter.prevent="addTag" />
+                        <ul v-if="filteredTags.length" class="tag-dropdown">
+                            <li v-for="(tag, index) in filteredTags"
+                                :key="index"
+                                @click="selectTag(tag)">
+                                {{ tag }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
                 <div class="mb-4 tags-list ">
@@ -58,7 +69,7 @@
         </div>
     </div>
 
-    
+
 </template>
 
 <script setup>
@@ -72,30 +83,90 @@
     const taskName = ref('');
     const taskDescription = ref('');
     const taskDeadline = ref('');
-    const selectedUserId = ref('');
+    const selectedUserId = ref(null);
     const users = ref([]);
     const error = ref('');
 
     const tags = ref([]);
+    const allTags = ref([]);
     const newTag = ref('');
+    const filteredTags = ref([]);
 
     onMounted(async () => {//userlarý fetch lemek için
         try {
-            const res = await fetch('http://localhost:5022/api/User/get_all');
-            users.value = await res.json();
+            const resUser = await fetch('http://localhost:5022/api/User/get_all');
+            users.value = await resUser.json();
+            users.value = users.value.filter(user => user.userRole !== 'Admin');
+
+            const resTag = await fetch('http://localhost:5022/api/Task/get-all-tags');
+            allTags.value = await resTag.json();
         } catch (err) {
-            console.error('Error fetching users:');
+            console.error('Error fetching users or tags:', err);
         }
     });
 
-    const addTag = () => {
-        if (newTag.value.trim() !== '') {//check if the new tag is not empty
-            tags.value.push(newTag.value.trim());//add to tags array
-            newTag.value = '';//reset input box
+    const addTag = async () => {
+        const tagName = newTag.value.trim();
+        if (!tagName) return;
+
+        try {
+            const response = await apiFetch('http://localhost:5022/api/Task/add-tag', {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    'Content-Type': 'application/json',
+                }, body: JSON.stringify({
+                    tagName: tagName
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add tag');
+            }
+
+            const tag = await response.json();
+            const tagString = typeof tag === "string" ? tag : tag.tagName;
+            tags.value.push(tagString);
+
+            newTag.value = '';
+
+
+        } catch (err) {
+            error.value = err.message || 'Network error';
         }
+
+
     };
+
     const removeTag = (index) => {
-        tags.value.splice(index, 1);//remove one item
+        tags.value = tags.value.filter((_, i) => i !== index);
+    };
+
+    const closeMenu = () => {
+        setTimeout(() => {
+            filteredTags.value = [];
+        }, 200);
+    };
+
+    const filterTags = () => {
+        const input = newTag.value.toLowerCase();
+        if (!input) {
+            showAllTags();
+            return;
+        }
+
+        filteredTags.value = allTags.value.filter(tag => tag.toLowerCase().startsWith(input) && !tags.value.includes(tag));
+    };
+
+    const selectTag = (tag) => {
+        const tagString = typeof tag === "string" ? tag : tag.tagName;
+        tags.value.push(tagString);
+        newTag.value = '';
+        filteredTags.value = [];
+    };
+
+    const showAllTags = () => {
+        filteredTags.value = allTags.value;
     };
 
     const handleCreate = async () => {
@@ -111,9 +182,11 @@
                     taskDescription: taskDescription.value,
                     taskDeadline: taskDeadline.value,
                     usrId: selectedUserId.value, // Use the selected user ID
-                    tags:tags.value
+                    tags: tags.value
                 })
             });
+
+            console.log(response.value);
 
             if (!response.ok) {
                 throw new Error('Failed to create task');
@@ -197,6 +270,31 @@
         button:hover {
             background-color: darkmagenta;
         }
+
+    .tag-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 150px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        z-index: 10;
+    }
+
+        .tag-dropdown li {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+            .tag-dropdown li:hover {
+                background: #eee;
+            }
 
     .tag-pill {
         display: inline-flex;

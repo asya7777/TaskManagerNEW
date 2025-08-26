@@ -17,7 +17,7 @@ namespace TaskManager.Application.Handlers.Tasks
         public CreateTaskHandler(ITaskRepository taskRepo, ITagRepository tagRepo)
         {
             _taskRepo = taskRepo;
-            _tagRepo= tagRepo;
+            _tagRepo = tagRepo;
         }
 
         public async System.Threading.Tasks.Task HandleAsync(CreateTaskDTO dto)
@@ -27,41 +27,29 @@ namespace TaskManager.Application.Handlers.Tasks
                 taskName = dto.taskName,
                 taskDescription = dto.taskDescription,
                 taskDeadline = dto.taskDeadline,
-                usrId = dto.usrId
+                usrId = dto.usrId,
+                Tags=new List<Tag>()
             };
+
+            foreach (var tagName in dto.Tags)
+            {
+                var existingTag = await _tagRepo.GetTagsByNameAsync(tagName);
+                if (existingTag != null)
+                {
+                    newTask.Tags.Add(existingTag);
+                }
+                else
+                {
+                    var newTag = new Tag { tagName = tagName };
+                    await _tagRepo.AddAsync(newTag);
+                    newTask.Tags.Add(newTag);
+                }
+            }
 
             await _taskRepo.AddAsync(newTask);
             await _taskRepo.SaveChangesAsync();//önce kayıt yapıyoruz ki taskId oluşsun
 
-            if(dto.Tags != null && dto.Tags.Count > 0)//check if a request was sent
-            {
-                var normalized = dto.Tags
-                    .Select(t => t.Trim())
-                    .Where(t => !string.IsNullOrWhiteSpace(t))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                var existingTags = await _tagRepo.GetAllTagsAsync();
-                var dict = existingTags.ToDictionary(t=> t.tagName, StringComparer.OrdinalIgnoreCase);//removing duplicates
-
-                foreach(var tagname in normalized)
-                {
-                    Tag tag;
-                    if(!dict.TryGetValue(tagname, out tag))//check if the tag exists
-                    {
-                        tag= new Tag
-                        {
-                            tagName = tagname
-                        };
-                        await _tagRepo.AddAsync(tag);
-                        dict[tagname] = tag; //add the new tag to the dictionary for later use!
-                    }
-
-                    newTask.Tags.Add(tag);//add the tag to the task
-                }
-
-                await _taskRepo.SaveChangesAsync();
-            }
+            
         }
     }
 }
