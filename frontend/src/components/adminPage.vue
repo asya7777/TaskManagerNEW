@@ -54,11 +54,14 @@
     import { apiFetch } from '../apiFetch';
     import { logout } from "../logout";
     import { useRouter } from 'vue-router';
+    import { useToast } from "vue-toastification";
 
     const router = useRouter();
     const users = ref([]);
     const firstName = ref('');
     const index = ref(0);
+
+    const toast = useToast();   
 
     onMounted(async () => {
         firstName.value = localStorage.getItem('firstName');
@@ -82,10 +85,10 @@
             });
             if (response.ok) {
                 users.value = users.value.filter(user => user.usrId !== id);
-                alert('User deleted successfully');
+                toast.success('User deleted successfully');
             } else {
                 const errorData = await response.json();
-                alert('Error deleting user: ' + errorData.message);
+                toast.error('Error deleting user: ' + errorData.message);
             }
         } catch (err) {
             console.error("Error deleting user:", err);

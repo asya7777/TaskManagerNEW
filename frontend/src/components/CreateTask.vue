@@ -64,7 +64,6 @@
                 </div>
 
                 <button class="btn create-button" type="submit">Create Task</button>
-                <p v-if="error" class="error">{{error}}</p>
             </form>
         </div>
     </div>
@@ -77,6 +76,7 @@
     import { useRouter } from 'vue-router';
     import { apiFetch } from '../apiFetch';
     import { logout } from "../logout";
+    import { useToast } from "vue-toastification"; 
 
     const router = useRouter();
 
@@ -85,7 +85,8 @@
     const taskDeadline = ref('');
     const selectedUserId = ref(null);
     const users = ref([]);
-    const error = ref('');
+
+    const toast = useToast();   
 
     const tags = ref([]);
     const allTags = ref([]);
@@ -132,7 +133,7 @@
 
 
         } catch (err) {
-            error.value = err.message || 'Network error';
+            toast.error( err.message || 'Network error');
         }
 
 
@@ -156,6 +157,7 @@
         }
 
         filteredTags.value = allTags.value.filter(tag => tag.toLowerCase().startsWith(input) && !tags.value.includes(tag));
+        
     };
 
     const selectTag = (tag) => {
@@ -170,7 +172,6 @@
     };
 
     const handleCreate = async () => {
-        error.value = '';
 
         try {
             const response = await apiFetch('http://localhost:5022/api/Task/create-task', {
@@ -192,7 +193,7 @@
                 throw new Error('Failed to create task');
             }
 
-            alert('Task created successfully!');
+            toast.success('Task created successfully!');
 
             //clear refs
             taskName.value = '';
@@ -204,7 +205,7 @@
             router.push('/user-page');
 
         } catch (err) {
-            error.value = err.message || 'Network error';
+            toast.error(err.message || 'Network error');
         }
     }
     const handleLogout = () => {

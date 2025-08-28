@@ -37,6 +37,7 @@ namespace TaskManager.API
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("SmtpOptions"));//load from config
             builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();//register the email sender service
 
+
             //repositoryleri ekliyoruz
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ITaskRepository, TaskRepository>();
@@ -97,12 +98,8 @@ namespace TaskManager.API
             }
 
             app.UseCors("AllowFrontend");
-
             app.UseAuthentication();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();

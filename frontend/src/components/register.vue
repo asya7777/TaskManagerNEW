@@ -30,7 +30,6 @@
             <button class="form-control mb-2" type="submit">Sign Up</button>
             <text type="button" @click="goToLogin">Login</text>
         </form>
-        <p v-if="error" class="error">{{ error }}</p>
     </div>
 
     <div v-if="loading" class="loading-overlay">
@@ -43,6 +42,7 @@
 <script setup>
     import { ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
+    import { useToast } from "vue-toastification"; 
 
     const email = ref('');
     const firstName = ref('');
@@ -50,27 +50,27 @@
     const password = ref('');
     const password_2 = ref('');
     const userRole = ref('');
-    const error = ref('');
 
     const loading = ref(false);
 
     const router = useRouter();
+
+    const toast = useToast();
 
     const goToLogin = () => {
         router.push('/login');
     }
 
     const handleRegister = async () => {
-        error.value = '';
         loading.value = true;
 
         if (password.value != password_2.value) {
-            error.value = "Passwords don't match!";
+            toast.error("Passwords don't match!");
             return;
         }
 
         if (password.value.length < 6) {
-            error.value = "Password must be at least 6 characters long.";
+            toast.error("Password must be at least 6 characters long.");
             return;
         }
 
@@ -90,16 +90,16 @@
             });
 
             if (!response.ok) {//was the response successful?
-                error.value = 'Register failed';
+                toast.error('Register failed');
             }
 
             const result = await response.text();//if successful, get the response text
-            alert(result);//display result
+            toast.success(result);//display result
             router.push('/login');//redirect to login page
 
         }
         catch (err) {
-            error.value = 'Network error';//fetch failed
+            toast.error('Network error');//fetch failed
         } finally {
             loading.value = false;
         }

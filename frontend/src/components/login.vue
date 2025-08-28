@@ -11,7 +11,6 @@
             <button class="form-control mb-4" type="submit">Login</button>
             <text type="button" @click="goToRegister">Register</text>
         </form>
-        <p v-if="error" class="error">{{error}}</p>
     </div>
 
     <div v-if="loading" class="loading-overlay">
@@ -24,15 +23,17 @@
 <script setup>
     import { ref, onMounted } from 'vue';//reactive variable
     import { useRouter, useRoute } from 'vue-router';
+    import { useToast } from "vue-toastification"; 
 
     const email = ref('');
     const password = ref('');
     const success = ref('');
 
-    const error = ref('');
 
     const router = useRouter();//to redirect to homepage after login
     const route = useRoute();//gives the current route object
+
+    const toast = useToast();
 
     const loading = ref(false);
 
@@ -48,7 +49,6 @@
     }
 
     const handleLogin = async () => {
-        error.value = '';//reset error message
         loading.value = true;
 
         try {
@@ -71,7 +71,7 @@
                 localStorage.setItem('firstName', data.firstName);
                 localStorage.setItem('role', data.role);
 
-                alert('Login successful!');
+                toast.success('Login successful!');
 
                 if (data.role == "Admin") {
                     router.push('/admin-page');
@@ -81,10 +81,10 @@
 
             } else {
                 const err = await response.text();
-                error.value = err;
+                toast.error(err || "Login failed");
             }
         } catch (err) {
-            error.value = 'Network error';//fetch failed
+            toast.error('Network error');//fetch failed
             router.push('/login');
         } finally {
             loading.value = false;

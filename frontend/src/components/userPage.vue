@@ -12,7 +12,6 @@
         <div class="d-flex">
             <nav class="shadow-sm sidebar soft-yellow border-end p-3">
                 <h2 class="to-do-text text-center fw-bold mb-3 fs-1">TO DO:</h2>
-                <p v-if="error" class=" fw-bold error-message text-danger text-center">{{ error }}</p>
                 <ul class="to-do-list list-group list-group-flush">
                     <li v-for="task in assignedTasks"
                         :key="task.taskId"
@@ -83,7 +82,14 @@
                     <button class="btn w-100 mb-10" @click="sortByDeadline">Sort by urgency</button>
 
                     <div>
-                        <input type="text" v-model="tagFilter" class="form-control mb-2" placeholder="Enter tag name" />
+                        <input type="text" v-model="tagFilter" class="form-control mb-2" placeholder="Enter tag name" @focus="showAllTags"  @blur="closeMenu" @input="filterTags" />
+                        <ul v-if="filteredTags.length" class="tag-dropdown">
+                            <li v-for="(tag, index) in filteredTags"
+                                :key="index"
+                                @click="selectTag(tag)">
+                                {{ tag }}
+                            </li>
+                        </ul>
                         <button class="btn w-100" @click="sortByTag">Filter by tag</button>
                     </div>
                 </div>
@@ -105,10 +111,10 @@
     import { apiFetch } from '../apiFetch';
     import { useRouter } from 'vue-router';
     import { logout } from "../logout";
+    import { useToast } from "vue-toastification";
 
     const router = useRouter();
 
-    const error = ref('');
 
     const allTasks = ref([]);
     const assignedTasks = ref([]);
@@ -117,8 +123,12 @@
 
     const showFilterPopup = ref(false);
     const tagFilter = ref('');
+    const allTags = ref([]);
+    const filteredTags = ref([]);
 
     const loading = ref(false);
+
+    const toast = useToast();
 
     const fetchTasks = async () => {
         const userId = localStorage.getItem('userId');
@@ -131,7 +141,7 @@
             assignedTasks.value = [...data];
         } catch (err) {
             console.error('Error fetching tasks:', err);
-            error.value = 'Server might not be running!';
+            toast.error('Server might not be running!');
             allTasks.value = [];
         } finally {
             loading.value = false;
@@ -140,7 +150,12 @@
 
     onMounted(async () => {
         firstName.value = localStorage.getItem('firstName');
-
+        try {
+            const resTag = await fetch('http://localhost:5022/api/Task/get-all-tags');
+            allTags.value = await resTag.json();
+        } catch (err) {
+            console.error('Error fetching tags:', err);
+        }
         await fetchTasks();
     });
 
@@ -169,6 +184,26 @@
         showFilterPopup.value = false;
     };
 
+    const filterTags = () => {
+        const filter = tagFilter.value.toLowerCase();
+        filteredTags.value = allTags.value.filter(tag => tag.toLowerCase().startsWith(filter));
+    };
+
+    const showAllTags = () => {
+        filteredTags.value = allTags.value;
+    };
+
+    const selectTag = (tag) => {
+        tagFilter.value = tag;
+        filteredTags.value = [];
+    };
+
+    const closeMenu = () => {
+        setTimeout(() => {
+            filteredTags.value = [];
+        }, 200);
+    };
+
     const markAsFinished = async (task) => {
         try {
             await apiFetch(`http://localhost:5022/api/Task/${task.taskId}/finish-task`, {
@@ -187,29 +222,29 @@
         }
     };
 
-    const deleteTask = async (taskId) => {
-        try {
-            const response = await fetch(`http://localhost:5022/api/Task/${taskId}`, {
-                method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                    "Content-Type": "application/json"
-                }
-            });
-            if (response.ok) {
-                allTasks.value = allTasks.value.filter(task => task.taskId !== taskId);
-                assignedTasks.value = assignedTasks.value.filter(task => task.taskId !== taskId);
-                alert('Task deleted successfully');
-                selectedTask.value = null;
-            } else {
-                const errorData = await response.json();
-                alert('Error deleting task: ' + errorData.message);
-            }
-        } catch (err) {
-            console.error("Error deleting task:", err);
-        }
+    //const deleteTask = async (taskId) => {
+    //    try {
+    //        const response = await fetch(`http://localhost:5022/api/Task/${taskId}`, {
+    //            method: 'DELETE',
+    //            headers: {
+    //                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+    //                "Content-Type": "application/json"
+    //            }
+    //        });s
+    //        if (response.ok) {
+    //            allTasks.value = allTasks.value.filter(task => task.taskId !== taskId);
+    //            assignedTasks.value = assignedTasks.value.filter(task => task.taskId !== taskId);
+    //            alert('Task deleted successfully');
+    //            selectedTask.value = null;
+    //        } else {
+    //            const errorData = await response.json();
+    //            alert('Error deleting task: ' + errorData.message);
+    //        }
+    //    } catch (err) {
+    //        console.error("Error deleting task:", err);
+    //    }
 
-    };
+    //};
 
 
     const handleLogout = () => {
@@ -299,6 +334,31 @@
         width: 90%; /* responsive */
         box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
+
+    .tag-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 150px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        z-index: 10;
+    }
+
+        .tag-dropdown li {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+            .tag-dropdown li:hover {
+                background: #eee;
+            }
 
     .loading-overlay {
         position: fixed;
